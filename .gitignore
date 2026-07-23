@@ -1,0 +1,18 @@
+# Visual Studio / Rider kullanıcı ayarları
+.vs/
+.idea/
+*.user
+*.suo
+
+# .NET derleme çıktıları
+bin/
+obj/
+
+# Yerel geliştirme ve gizli ayar dosyaları
+appsettings.Local.json
+appsettings.*.Local.json
+.env
+
+# İşletim sistemi dosyaları
+.DS_Store
+Thumbs.db
