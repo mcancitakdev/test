@@ -1,9 +1,7 @@
-public string PortName { get; set; }
-    public int BaudRate { get; set; }
-
-    public Models Model { get; set; }
-    public string ModelName { get; set; }
-    public string MachineSerialNumber { get; set; }
-    public string SoftwareVersion { get; set; }
-    public string SoftwareDate { get; set; }
-    public string UserName { get; set; }
+private readonly string[] _machinePorts =
+{
+    "COM1",
+    "COM2",
+    "COM3",
+    "COM4"
+};
