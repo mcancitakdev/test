@@ -1,7 +1,17 @@
-private readonly string[] _machinePorts =
+private readonly int[] _machineBaudRates =
 {
-    "COM1",
-    "COM2",
-    "COM3",
-    "COM4"
+    115200,
+    38400,
+    19200,
+    9600
 };
+
+private readonly object _machineInfoLock = new object();
+
+private TaskCompletionSource<MachineConnectionResult>
+    _machineInfoCompletion;
+
+private readonly SemaphoreSlim _connectionScanLock =
+    new SemaphoreSlim(1, 1);
+
+private bool _connectionScanRunning;
