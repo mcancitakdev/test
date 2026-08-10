@@ -1,17 +1,28 @@
-private readonly int[] _machineBaudRates =
+using System.Net.Http.Json;
+
+public sealed class ApiAnnouncementNotifier(
+    HttpClient httpClient,
+    IConfiguration configuration,
+    ILogger<ApiAnnouncementNotifier> logger)
+    : IAnnouncementNotifier
 {
-    115200,
-    38400,
-    19200,
-    9600
-};
+    public async Task NotifyAsync(
+        AnnouncementNotification notification,
+        CancellationToken cancellationToken)
+    {
+        var apiUrl = configuration["NotificationApi:ApiUrl"]
+            ?? throw new InvalidOperationException(
+                "NotificationApi:ApiUrl tanımlanmalıdır.");
 
-private readonly object _machineInfoLock = new object();
+        using var response = await httpClient.PostAsJsonAsync(
+            apiUrl,
+            notification,
+            cancellationToken);
 
-private TaskCompletionSource<MachineConnectionResult>
-    _machineInfoCompletion;
+        response.EnsureSuccessStatusCode();
 
-private readonly SemaphoreSlim _connectionScanLock =
-    new SemaphoreSlim(1, 1);
-
-private bool _connectionScanRunning;
+        logger.LogInformation(
+            "Duyuru {AnnouncementId} API'ye gönderildi.",
+            notification.Trigger.AnnouncementId);
+    }
+}
