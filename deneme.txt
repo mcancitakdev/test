@@ -1,28 +1,6 @@
-using System.Net.Http.Json;
-
-public sealed class ApiAnnouncementNotifier(
-    HttpClient httpClient,
-    IConfiguration configuration,
-    ILogger<ApiAnnouncementNotifier> logger)
-    : IAnnouncementNotifier
-{
-    public async Task NotifyAsync(
-        AnnouncementNotification notification,
-        CancellationToken cancellationToken)
+var json = JsonSerializer.Serialize(
+    notification,
+    new JsonSerializerOptions(JsonSerializerDefaults.Web)
     {
-        var apiUrl = configuration["NotificationApi:ApiUrl"]
-            ?? throw new InvalidOperationException(
-                "NotificationApi:ApiUrl tanımlanmalıdır.");
-
-        using var response = await httpClient.PostAsJsonAsync(
-            apiUrl,
-            notification,
-            cancellationToken);
-
-        response.EnsureSuccessStatusCode();
-
-        logger.LogInformation(
-            "Duyuru {AnnouncementId} API'ye gönderildi.",
-            notification.Trigger.AnnouncementId);
-    }
-}
+        WriteIndented = true
+    });
