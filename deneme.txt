@@ -1,5 +1,12 @@
-var logPath = builder.Configuration["Logging:FilePath"]
-    ?? Path.Combine(
-        AppContext.BaseDirectory,
-        "logs",
-        "log-.txt");
+Task ExpireCompletedAsync(
+    DateTime now,
+    CancellationToken cancellationToken);
+
+Task<Announcement?> ClaimNextAsync(
+    DateTime now,
+    CancellationToken cancellationToken);
+
+Task MarkCompletedAsync(
+    long announcementId,
+    DateTime updatedAt,
+    CancellationToken cancellationToken);
