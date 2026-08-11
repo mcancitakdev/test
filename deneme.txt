@@ -1,6 +1,19 @@
-var json = JsonSerializer.Serialize(
-    notification,
-    new JsonSerializerOptions(JsonSerializerDefaults.Web)
-    {
-        WriteIndented = true
-    });
+var logPath = Path.Combine(
+    AppContext.BaseDirectory,
+    "logs",
+    "log-.txt");
+
+builder.Services.AddSerilog(
+    (_, loggerConfiguration) => loggerConfiguration
+        .MinimumLevel.Information()
+        .WriteTo.Console()
+        .WriteTo.File(
+            logPath,
+            rollingInterval: RollingInterval.Day,
+            retainedFileCountLimit: 30,
+            shared: true,
+            flushToDiskInterval: TimeSpan.FromSeconds(1),
+            outputTemplate:
+                "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} " +
+                "[{Level:u3}] {SourceContext} {Message:lj}" +
+                "{NewLine}{Exception}"));
