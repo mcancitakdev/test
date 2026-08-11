@@ -1,19 +1,5 @@
-var logPath = Path.Combine(
-    AppContext.BaseDirectory,
-    "logs",
-    "log-.txt");
-
-builder.Services.AddSerilog(
-    (_, loggerConfiguration) => loggerConfiguration
-        .MinimumLevel.Information()
-        .WriteTo.Console()
-        .WriteTo.File(
-            logPath,
-            rollingInterval: RollingInterval.Day,
-            retainedFileCountLimit: 30,
-            shared: true,
-            flushToDiskInterval: TimeSpan.FromSeconds(1),
-            outputTemplate:
-                "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} " +
-                "[{Level:u3}] {SourceContext} {Message:lj}" +
-                "{NewLine}{Exception}"));
+var logPath = builder.Configuration["Logging:FilePath"]
+    ?? Path.Combine(
+        AppContext.BaseDirectory,
+        "logs",
+        "log-.txt");
