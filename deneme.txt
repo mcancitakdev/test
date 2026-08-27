@@ -1,12 +1,43 @@
-Task ExpireCompletedAsync(
-    DateTime now,
-    CancellationToken cancellationToken);
+DECLARE @Now DATETIME2 = SYSUTCDATETIME();
 
-Task<Announcement?> ClaimNextAsync(
-    DateTime now,
-    CancellationToken cancellationToken);
+SELECT
+    a.Id,
+    a.StatusId,
+    a.IsDeleted,
+    a.TypeId,
+    a.PublishStartAt,
+    a.PublishEndAt,
 
-Task MarkCompletedAsync(
-    long announcementId,
-    DateTime updatedAt,
-    CancellationToken cancellationToken);
+    GETDATE() AS SqlLocalTime,
+    SYSUTCDATETIME() AS SqlUtcTime,
+    @Now AS WorkerNow,
+
+    CASE
+        WHEN a.StatusId = 2 THEN 'OK'
+        ELSE CONCAT('HATA - StatusId: ', a.StatusId)
+    END AS StatusKontrol,
+
+    CASE
+        WHEN a.IsDeleted = 0 THEN 'OK'
+        ELSE 'HATA - IsDeleted 1'
+    END AS DeletedKontrol,
+
+    CASE
+        WHEN a.PublishStartAt <= @Now THEN 'OK'
+        ELSE 'HATA - PublishStartAt henüz gelmemiş'
+    END AS StartKontrol,
+
+    CASE
+        WHEN a.PublishEndAt >= @Now THEN 'OK'
+        ELSE 'HATA - PublishEndAt geçmiş'
+    END AS EndKontrol,
+
+    CASE
+        WHEN ant.Id IS NOT NULL THEN 'OK'
+        ELSE 'HATA - AnnouncementType eşleşmiyor'
+    END AS TypeKontrol
+
+FROM dbo.Announcement AS a
+LEFT JOIN dbo.AnnouncementType AS ant
+    ON ant.Id = a.TypeId
+WHERE a.Id = 1500;
