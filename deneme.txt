@@ -1,1 +1,63 @@
 
+using System;
+using System.IO;
+using System.Text;
+
+public static bool ConvertUtf8ToAnsiIfNeeded(string filePath)
+{
+    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+    byte[] bytes = File.ReadAllBytes(filePath);
+
+    // UTF-8 BOM varsa kesin UTF-8
+    bool hasUtf8Bom =
+        bytes.Length >= 3 &&
+        bytes[0] == 0xEF &&
+        bytes[1] == 0xBB &&
+        bytes[2] == 0xBF;
+
+    bool isUtf8 = hasUtf8Bom || IsValidUtf8(bytes);
+
+    if (!isUtf8)
+    {
+        // UTF-8 değilse hiçbir şey yapma
+        return false;
+    }
+
+    // BOM varsa GetString zaten BOM'u karakter olarak bırakmasın diye
+    // UTF8Encoding üzerinden okuyalım.
+    string text = new UTF8Encoding(
+        encoderShouldEmitUTF8Identifier: false,
+        throwOnInvalidBytes: true
+    ).GetString(
+        bytes,
+        hasUtf8Bom ? 3 : 0,
+        hasUtf8Bom ? bytes.Length - 3 : bytes.Length
+    );
+
+    // Turkish ANSI = Windows-1254
+    Encoding ansi = Encoding.GetEncoding(1254);
+
+    File.WriteAllText(filePath, text, ansi);
+
+    return true;
+}
+
+private static bool IsValidUtf8(byte[] bytes)
+{
+    try
+    {
+        var utf8Strict = new UTF8Encoding(
+            encoderShouldEmitUTF8Identifier: false,
+            throwOnInvalidBytes: true
+        );
+
+        utf8Strict.GetString(bytes);
+
+        return true;
+    }
+    catch (DecoderFallbackException)
+    {
+        return false;
+    }
+}
